@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arsip Dokumen — Haidir</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Kotak Login */
+        .login-container {
+            background: #fff;
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+        }
+        .login-container.hidden { display: none; }
+        .login-header { text-align: center; margin-bottom: 30px; }
+        .login-header h2 { color: #2c3e50; margin-bottom: 8px; }
+        .login-header p { color: #7f8c8d; font-size: 15px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 500; }
+        .form-group input {
+            width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0;
+            border-radius: 8px; font-size: 16px; transition: border-color 0.3s;
+        }
+        .form-group input:focus { outline: none; border-color: #3498db; }
+        .btn-login {
+            width: 100%; padding: 13px; background: #3498db; color: white;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-login:hover { background: #2980b9; }
+        .pesan-error { color: #e74c3c; margin-top: 15px; text-align: center; display: none; }
+
+        /* Halaman Dokumen */
+        .dokumen-page {
+            background: #fff; width: 100%; max-width: 1000px; margin: 0 auto;
+            border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); overflow: hidden;
+            display: none;
+        }
+        .dokumen-page.tampil { display: block; }
+        .header {
+            background: #2c3e50; color: white; padding: 25px 30px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+        }
+        .header h1 { font-size: 22px; }
+        .jumlah-info { font-size: 14px; opacity: 0.9; }
+        .btn-keluar {
+            background: #e74c3c; color: white; border: none; padding: 10px 20px;
+            border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.3s;
+        }
+        .btn-keluar:hover { background: #c0392b; }
+        .isi { padding: 30px; }
+        .selamat {
+            background: #e8f5e9; border-left: 4px solid #2ecc71;
+            padding: 15px 20px; margin-bottom: 25px; border-radius: 0 6px 6px 0;
+        }
+
+        /* Bagian Unggah */
+        .bagian-unggah {
+            background: #f0f7ff; border: 2px dashed #3498db;
+            padding: 25px; border-radius: 10px; margin-bottom: 30px; text-align: center;
+        }
+        .bagian-unggah h3 { color: #2c3e50; margin-bottom: 10px; }
+        .batas-info { font-size: 14px; color: #7f8c8d; margin-bottom: 15px; }
+        .input-berkas { margin: 15px 0; width: 100%; }
+        .btn-unggah {
+            background: #3498db; color: white; border: none; padding: 10px 25px;
+            border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.3s;
+        }
+        .btn-unggah:hover { background: #2980b9; }
+        .penuh { color: #e74c3c; font-weight: 600; margin-top: 10px; display: none; }
+
+        /* Daftar Dokumen */
+        .daftar-dokumen h3 { color: #2c3e50; margin-bottom: 18px; }
+        .daftar-dokumen ul { list-style: none; max-height: 500px; overflow-y: auto; }
+        .daftar-dokumen li {
+            padding: 14px 18px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+            transition: background 0.2s;
+        }
+        .daftar-dokumen li:hover { background: #f8f9fa; }
+        .nama-file { font-weight: 500; color: #2c3e50; flex: 1; min-width: 180px; }
+        .tombol-unduh {
+            background: #2ecc71; color: white; text-decoration: none; padding: 8px 12px;
+            border-radius: 5px; font-size: 14px; margin-right: 5px; transition: background 0.3s;
+        }
+        .tombol-unduh:hover { background: #27ae60; }
+        .tombol-pratinjau {
+            background: #f39c12; color: white; border: none; padding: 8px 12px;
+            border-radius: 5px; font-size: 14px; margin-right: 5px; cursor: pointer; transition: background 0.3s;
+        }
+        .tombol-pratinjau:hover { background: #e67e22; }
+        .tombol-hapus {
+            background: #e74c3c; color: white; border: none; padding: 8px 12px;
+            border-radius: 5px; font-size: 14px; cursor: pointer; transition: background 0.3s;
+        }
+        .tombol-hapus:hover { background: #c0392b; }
+        .info-kosong { color: #7f8c8d; font-style: italic; padding: 10px 0; }
+
+        /* Kotak Pratinjau */
+        .latar-pratinjau {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center;
+            z-index: 1000; padding: 20px;
+        }
+        .kotak-pratinjau {
+            background: #fff; border-radius: 12px; width: 100%; max-width: 850px; max-height: 90vh;
+            overflow: hidden; display: flex; flex-direction: column;
+        }
+        .kepala-pratinjau {
+            background: #2c3e50; color: white; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .tutup-pratinjau {
+            background: none; border: none; color: white; font-size: 24px; cursor: pointer;
+            opacity: 0.8; transition: opacity 0.2s;
+        }
+        .tutup-pratinjau:hover { opacity: 1; }
+        .isi-pratinjau {
+            padding: 20px; overflow-y: auto; flex: 1; min-height: 300px;
+        }
+        .isi-pratinjau img { max-width: 100%; height: auto; border-radius: 6px; }
+        .isi-pratinjau iframe { width: 100%; height: 500px; border: none; border-radius: 6px; }
+        .isi-pratinjau .teks-pratinjau {
+            background: #f8f9fa; padding: 15px; border-radius: 6px; white-space: pre-wrap; word-break: break-all;
+        }
+        .tidak-bisa-pratinjau {
+            text-align: center; padding: 40px; color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Halaman Login -->
+    <div class="login-container" id="kotakLogin">
+        <div class="login-header">
+            <h2>🔐 Masuk Akun</h2>
+            <p>Sistem Arsip Dokumen — Kapasitas 390 Berkas</p>
+        </div>
+        <form id="formLogin">
+            <div class="form-group">
+                <label for="nama">Nama Pengguna</label>
+                <input type="text" id="nama" placeholder="Masukkan nama" required>
+            </div>
+            <div class="form-group">
+                <label for="katasandi">Kata Sandi</label>
+                <input type="password" id="katasandi" placeholder="Masukkan kata sandi" required>
+            </div>
+            <button type="submit" class="btn-login">Masuk</button>
+            <div class="pesan-error" id="pesanSalah">Nama atau kata sandi salah!</div>
+        </form>
+    </div>
+
+    <!-- Halaman Dokumen -->
+    <div class="dokumen-page" id="halamanDokumen">
+        <div class="header">
+            <div>
+                <h1>📂 Arsip Dokumen — Haidir</h1>
+                <p class="jumlah-info" id="jumlahInfo">0 / 390 berkas tersimpan</p>
+            </div>
+            <button class="btn-keluar" id="tombolKeluar">Keluar</button>
+        </div>
+        <div class="isi">
+            <div class="selamat">
+                <h3>Selamat datang, Haidir! ✅</h3>
+                <p>Unggah, pratinjau, dan unduh dokumen Anda.</p>
+            </div>
+
+            <!-- Bagian Unggah -->
+            <div class="bagian-unggah">
+                <h3>⬆️ Unggah Dokumen Baru</h3>
+                <p class="batas-info">Pratinjau mendukung: Gambar, PDF, Teks, HTML</p>
+                <input type="file" id="pilihBerkas" class="input-berkas">
+                <button class="btn-unggah" id="tombolUnggah">Simpan Berkas</button>
+                <p class="penuh" id="pesanPenuh">⚠️ Kapasitas penuh! Hapus berkas lama dulu.</p>
+            </div>
+
+            <!-- Daftar Dokumen -->
+            <div class="daftar-dokumen">
+                <h3>Daftar Dokumen Tersimpan</h3>
+                <ul id="daftarBerkas">
+                    <li class="info-kosong">Belum ada dokumen yang diunggah.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kotak Pratinjau -->
+    <div class="latar-pratinjau" id="latarPratinjau">
+        <div class="kotak-pratinjau">
+            <div class="kepala-pratinjau">
+                <h3 id="namaPratinjau">Pratinjau Berkas</h3>
+                <button class="tutup-pratinjau" id="tutupPratinjau">&times;</button>
+            </div>
+            <div class="isi-pratinjau" id="isiPratinjau"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data akun
+        const namaBenar = "haidir";
+        const sandiBenar = "9393";
+        const MAKSIMAL_BERKAS = 390;
+
+        const formLogin = document.getElementById('formLogin');
+        const kotakLogin = document.getElementById('kotakLogin');
+        const halamanDokumen = document.getElementById('halamanDokumen');
+        const pesanSalah = document.getElementById('pesanSalah');
+        const tombolKeluar = document.getElementById('tombolKeluar');
+        const daftarBerkas = document.getElementById('daftarBerkas');
+        const tombolUnggah = document.getElementById('tombolUnggah');
+        const pilihBerkas = document.getElementById('pilihBerkas');
+        const jumlahInfo = document.getElementById('jumlahInfo');
+        const pesanPenuh = document.getElementById('pesanPenuh');
+        const latarPratinjau = document.getElementById('latarPratinjau');
+        const isiPratinjau = document.getElementById('isiPratinjau');
+        const namaPratinjau = document.getElementById('namaPratinjau');
+        const tutupPratinjau = document.getElementById('tutupPratinjau');
+
+        // Muat data
+        let daftarSimpan = JSON.parse(localStorage.getItem('arsipHaidir') || '[]');
+
+        // Login
+        formLogin.addEventListener('submit', e => {
+            e.preventDefault();
+            const nama = document.getElementById('nama').value.trim().toLowerCase();
+            const sandi = document.getElementById('katasandi').value;
+            if (nama === namaBenar && sandi === sandiBenar) {
+                kotakLogin.classList.add('hidden');
+                halamanDokumen.classList.add('tampil');
+                pesanSalah.style.display = 'none';
+                tampilkanDaftar();
+            } else {
+                pesanSalah.style.display = 'block';
+            }
+        });
+
+        // Keluar
+        tombolKeluar.addEventListener('click', () => {
+            kotakLogin.classList.remove('hidden');
+            halamanDokumen.classList.remove('tampil');
+            pesanSalah.style.display = 'none';
+            document.getElementById('nama').value = '';
+            document.getElementById('katasandi').value = '';
+        });
+
+        // Tutup pratinjau
+        tutupPratinjau.addEventListener('click', () => {
+            latarPratinjau.style.display = 'none';
+            isiPratinjau.innerHTML = '';
+        });
+        latarPratinjau.addEventListener('click', e => {
+            if (e.target === latarPratinjau) {
+                latarPratinjau.style.display = 'none';
+                isiPratinjau.innerHTML = '';
+            }
+        });
+
+        // Tampilkan daftar
+        function tampilkanDaftar() {
+            daftarBerkas.innerHTML = '';
+            jumlahInfo.textContent = `${daftarSimpan.length} / ${MAKSIMAL_BERKAS} berkas tersimpan`;
+            
+            if (daftarSimpan.length >= MAKSIMAL_BERKAS) {
+                pesanPenuh.style.display = 'block';
+                tombolUnggah.disabled = true;
+                tombolUnggah.style.opacity = '0.5';
+            } else {
+                pesanPenuh.style.display = 'none';
+                tombolUnggah.disabled = false;
+                tombolUnggah.style.opacity = '1';
+            }
+
+            if (daftarSimpan.length === 0) {
+                daftarBerkas.innerHTML = '<li class="info-kosong">Belum ada dokumen yang diunggah.</li>';
+                return;
+            }
+
+            daftarSimpan.forEach((item, idx) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="nama-file">📄 ${item.nama}</span>
+                    <div>
+                        <button class="tombol-pratinjau" data-idx="${idx}">👁️ Pratinjau</button>
+                        <a href="${item.tautan}" download="${item.nama}" class="tombol-unduh">⬇️ Unduh</a>
+                        <button class="tombol-hapus" data-idx="${idx}">🗑️ Hapus</button>
+                    </div>
+                `;
+                daftarBerkas.appendChild(li);
+            });
+
+            // Pratinjau
+            document.querySelectorAll('.tombol-pratinjau').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const idx = parseInt(this.dataset.idx);
+                    bukaPratinjau(daftarSimpan[idx]);
+                });
+            });
+
+            // Hapus
+            document.querySelectorAll('.tombol-hapus').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const idx = parseInt(this.dataset.idx);
+                    if (confirm(`Yakin hapus "${daftarSimpan[idx].nama}"?`)) {
+                        daftarSimpan.splice(idx, 1);
+                        simpanData();
+                        tampilkanDaftar();
+                    }
+                });
+            });
+        }
+
+        // Buka pratinjau
+        function bukaPratinjau(berkas) {
+            namaPratinjau.textContent = berkas.nama;
+            isiPratinjau.innerHTML = '';
+            const jenis = berkas.jenis;
+            const nama = berkas.nama.toLowerCase();
+
+            if (jenis.startsWith('image/')) {
+                isiPratinjau.innerHTML = `<img src="${berkas.tautan}" alt="${berkas.nama}">`;
+            } else if (jenis === 'application/pdf' || nama.endsWith('.pdf')) {
+                isiPratinjau.innerHTML = `<iframe src="${berkas.tautan}"></iframe>`;
+            } else if (jenis.startsWith('text/') || nama.endsWith('.txt') || nama.endsWith('.md')) {
+                const bagian = berkas.tautan.split(',')[1];
+                const teks = atob(bagian);
+                isiPratinjau.innerHTML = `<div class="teks-pratinjau">${teks}</div>`;
+            } else if (nama.endsWith('.html') || nama.endsWith('.htm')) {
+                isiPratinjau.innerHTML = `<iframe src="${berkas.tautan}"></iframe>`;
+            } else {
+                isiPratinjau.innerHTML = `
+                    <div class="tidak-bisa-pratinjau">
+                        <h3>❌ Tidak dapat menampilkan pratinjau</h3>
+                        <p>Jenis berkas: ${jenis || 'Tidak diketahui'}</p>
+                        <p style="margin:15px 0;">Silakan unduh untuk membukanya.</p>
+                        <a href="${berkas.tautan}" download="${berkas.nama}" class="tombol-unduh" style="display:inline-block; padding:10px 20px;">⬇️ Unduh Berkas</a>
+                    </div>
+                `;
+            }
+
+            latarPratinjau.style.display = 'flex';
+        }
+
+        // Unggah berkas
+        tombolUnggah.addEventListener('click', () => {
+            const berkas = pilihBerkas.files[0];
+            if (!berkas) return alert('Pilih berkas dulu!');
+            if (daftarSimpan.length >= MAKSIMAL_BERKAS) {
+                return alert('Sudah mencapai batas 390 berkas! Hapus yang lama dulu.');
+            }
+
+            const pembaca = new FileReader();
+            pembaca.onload = e => {
+                daftarSimpan.push({
+                    nama: berkas.name,
+                    ukuran: berkas.size,
+                    jenis: berkas.type,
+                    tautan: e.target.result
+                });
+                simpanData();
+                tampilkanDaftar();
+                pilihBerkas.value = '';
+                alert(`✅ Berkas berhasil disimpan! (${daftarSimpan.length}/${MAKSIMAL_BERKAS})`);
+            };
+            pembaca.readAsDataURL(berkas);
+        });
+
+        function simpanData() {
+            localStorage.setItem('arsipHaidir', JSON.stringify(daftarSimpan));
+        }
+    </script>
+</body>
+</html>
